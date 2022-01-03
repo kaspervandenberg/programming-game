@@ -1,0 +1,9 @@
+table,
+td {
+    border: 1px solid #333;
+}
+
+#scene td {
+    width: 66px;
+    height: 66px;
+}
