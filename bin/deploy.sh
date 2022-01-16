@@ -5,6 +5,7 @@ DIRS=("img"
        	"scripts/lib/jquery"
        	"scripts/lib/lodash/4.17.15-npm");
 ASSETS=("img/Robot_37500.png"
+	"img/Sports-Finish-Flag-icon.png"
 	"styles/style.css"
 	"scripts/script.js"
 	"scripts/lib/jquery/jquery-3.6.0.js"
