@@ -80,6 +80,24 @@ class GridBoundary {
 	}
 };
 
+class Finish {
+	constructor(x, y) {
+		this.pos = Object.freeze({ x: x, y: y});
+		this.spriteUrl = 'img/Sports-Finish-Flag-icon.png';
+	}
+
+	subscribe(robot) {
+		robot.moveObservers.push(_.bind(this.finishWhenReached, this));
+	}
+
+	finishWhenReached(move) {
+		if (move.to.x == this.pos.x
+				&& move.to.y == this.pos.y) {
+			window.alert("Gelukt!\nJe hebt de robot bij de finish gebracht!");
+		}
+	}
+}
+
 const syntaxCommandAndCount = /(left|right|up|down)\((\d+)\)\w*/g;
 
 class Compiler {
@@ -175,9 +193,10 @@ class Program {
 }
 
 class Scene {
-	constructor(robot, bounds) {
+	constructor(robot, bounds, entities) {
 		this.$element = $('#scene');
 		this.$programText = $('#sourceCode');
+		this.entities = entities;
 		this.robot = robot;
 		this.bounds = bounds;
 		this.stepDelay = 500;
@@ -186,8 +205,13 @@ class Scene {
 	}
 
 	render() {
+		const me = this;
 		this._renderGrid();
 		this._showSprite(this.robot.pos, this.robot);
+
+		this._forEntities(
+			(x) => x.spriteUrl && x.pos,
+			(x) => me._showSprite(x.pos, x));
 	}
 
 	runProgram() {
@@ -201,6 +225,10 @@ class Scene {
 	_subscribeEvents() {
 		this.bounds.subscribe(this.robot);
 		this._subscribeMoveAnimation(this.robot);
+
+		this._forEntities(
+			(x) => x.subscribe,
+			(x) => x.subscribe(this.robot));
 	}
 
 	_subscribeMoveAnimation(robot) {
@@ -217,6 +245,14 @@ class Scene {
 			tableHtml.push('</tr>');
 		}
 		return this.$element.html(tableHtml.join(''));
+	}
+
+	_forEntities(predicate, action) {
+		_.each(
+			_.filter(
+				this.entities,
+				predicate),
+			action);
 	}
 
 	_moveSprite(move, entity) {
@@ -249,7 +285,8 @@ $(document).ready(function() {
 	"strict";
 	scene = new Scene(
 		new Robot(4, 4),
-		new GridBoundary(0, 0, 4, 4));
+		new GridBoundary(0, 0, 4, 4),
+		[ new Finish(2, 2)]);
 
 	scene.render();
 });
