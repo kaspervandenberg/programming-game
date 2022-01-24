@@ -205,12 +205,8 @@ class Scene {
 	}
 
 	render() {
-		const me = this;
 		this._renderGrid();
-
-		this._forEntities(
-			(x) => x.spriteUrl && x.pos,
-			(x) => me._showSprite(x.pos, x));
+		this._showAllEntities();
 	}
 
 	runProgram() {
@@ -223,7 +219,10 @@ class Scene {
 
 	_subscribeEvents() {
 		this._subscribeMoveAnimation(this.robot);
+		this._subscribeAllEnities();
+	}
 
+	_subscribeAllEnities() {
 		this._forEntities(
 			(x) => x.subscribe,
 			(x) => x.subscribe(this.robot));
@@ -261,6 +260,13 @@ class Scene {
 	_showSprite(pos, entity) {
 		this._findCell(pos)
 			.html('<img src="' + entity.spriteUrl + '"/>');
+	}
+
+	_showAllEntities() {
+		const me = this;
+		this._forEntities(
+			(x) => x.spriteUrl && x.pos,
+			(x) => me._showSprite(x.pos, x));
 	}
 
 	_clear(pos) {
