@@ -208,6 +208,11 @@ class Scene {
 		this._subscribeEvents();
 	}
 
+	reset() {
+		this._resetAllEntitiesToInitialPosition();
+		this.render();
+	}
+
 	render() {
 		this._renderGrid();
 		this._showAllEntities();
@@ -216,8 +221,7 @@ class Scene {
 	runProgram() {
 		if (!this._hasRunningProgram()) {
 			this.program = this._makeProgram();
-			this._resetAllEntitiesToInitialPosition();
-			this.render();
+			this.reset();
 			this.program.run();
 		}
 		else {
