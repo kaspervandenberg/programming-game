@@ -146,30 +146,31 @@ class Compiler {
 };
 
 class Program {
-	constructor(source, actionList, stepDelay) {
+	constructor(source, actionList, stepDelay, observers) {
 		this.status = 'stopped';
 		this.source = source;
 		this.actionList = actionList;
 		this.stepDelay = stepDelay;
+		this.observers = observers || [];
 	}
 
 	run() {
-		if (this.status != 'running') {
+		if (!this.isRunning()) {
 			const steps = _.map(this.actionList, this._step.bind(this));
 			if (steps && steps.length >= 1) {
-				this.status = 'running';
+				this._setStatus('running');
 				var promise = steps[0]();
 				const tail = steps.slice(1);
 				for (const x of tail) {
 					promise = promise.then(x);
 				}
-				promise.then(() => this.status = 'finished');
+				promise.then(() => this._setStatus('finished'));
 			}
 		}
 	}
 
 	stop() {
-		this.status = 'abort';
+		this._setStatus('abort');
 	}
 
 	isRunning() {
@@ -194,12 +195,23 @@ class Program {
 			return ret;
 		}
 	}
+
+	_setStatus(newStatus) {
+		const oldStatus = this.status;
+		this.status = newStatus;
+		this._notifyObservers(oldStatus, this.status);
+	}
+
+	_notifyObservers(oldStatus, status) {
+		_.each(this.observers, (f) => f(this, status, oldStatus));
+	}
 }
 
 class Scene {
-	constructor(robot, bounds, otherEntities) {
+	constructor(robot, bounds, otherEntities, programObservers) {
 		this.$element = $('#scene');
 		this.$programText = $('#sourceCode');
+		this.programObservers = programObservers || [];
 		this.entities = _.concat(robot, bounds, otherEntities);
 		this.robot = robot;
 		this.bounds = bounds;
@@ -237,7 +249,7 @@ class Scene {
 	_subscribeAllEnities() {
 		this._forEntities(
 			(x) => x.subscribe,
-			(x) => x.subscribe(this.robot));
+			(x) => x.subscribe(this.robot, this));
 	}
 
 	_subscribeMoveAnimation(robot) {
@@ -260,7 +272,7 @@ class Scene {
 		const compiler = new Compiler(this.robot);
 		const source = this.$programText.val();
 		const interpretedProgram = compiler.compile(source);
-		return new Program(source, interpretedProgram, this.stepDelay);
+		return new Program(source, interpretedProgram, this.stepDelay, this.programObservers);
 	}
 
 	_forEntities(predicate, action) {
