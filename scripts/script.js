@@ -231,7 +231,7 @@ class Scene {
 	}
 
 	runProgram() {
-		if (!this._hasRunningProgram()) {
+		if (!this.hasRunningProgram()) {
 			this.program = this._makeProgram();
 			this.reset();
 			this.program.run();
@@ -239,6 +239,11 @@ class Scene {
 		else {
 			alert('Even wachten, het programma loopt nog.');
 		}
+	}
+
+	hasRunningProgram() {
+		return this.program
+			&& this.program.isRunning();
 	}
 
 	_subscribeEvents() {
@@ -321,11 +326,6 @@ class Scene {
 			(x) => x.initialPos && x.pos,
 			(x) => me._resetToInitialPosition(x));
 	}
-
-	_hasRunningProgram() {
-		return this.program
-			&& this.program.isRunning();
-	}
 }
 
 
@@ -339,6 +339,11 @@ $(document).ready(function() {
 		new GridBoundary(0, 0, 4, 4),
 		[ new Finish(2, 2)]);
 
+	scene.programObservers.push(disableButtonsWhenProgramIsRunning);
 	scene.render();
+
+	function disableButtonsWhenProgramIsRunning() {
+		$('button').attr('disabled', scene.hasRunningProgram());
+	}
 });
 
