@@ -172,12 +172,16 @@ class Program {
 		this.status = 'abort';
 	}
 
+	isRunning() {
+		return this.status == 'running';
+	}
+
 	_step(action) {
 		const me = this;
 		return function() {
 			const ret = $.Deferred();
 			function whenRunning(f) {
-				return (me.status == 'running')
+				return me.isRunning()
 					? f()
 					: ret.reject();
 			}
@@ -210,11 +214,13 @@ class Scene {
 	}
 
 	runProgram() {
-		const compiler = new Compiler(this.robot);
-		const source = this.$programText.val();
-		const interpretedProgram = compiler.compile(source);
-		this.program = new Program(source, interpretedProgram, this.stepDelay);
-		this.program.run();
+		if (!this._hasRunningProgram()) {
+			this.program = this._makeProgram();
+			this.program.run();
+		}
+		else {
+			alert('Even wachten, het programma loopt nog.');
+		}
 	}
 
 	_subscribeEvents() {
@@ -242,6 +248,13 @@ class Scene {
 			tableHtml.push('</tr>');
 		}
 		return this.$element.html(tableHtml.join(''));
+	}
+
+	_makeProgram() {
+		const compiler = new Compiler(this.robot);
+		const source = this.$programText.val();
+		const interpretedProgram = compiler.compile(source);
+		return new Program(source, interpretedProgram, this.stepDelay);
 	}
 
 	_forEntities(predicate, action) {
@@ -278,6 +291,11 @@ class Scene {
 		return this.$element
 			.find("tr").eq(pos.y - this.bounds.y.min)
 			.find("td").eq(pos.x - this.bounds.x.min);
+	}
+
+	_hasRunningProgram() {
+		return this.program
+			&& this.program.isRunning();
 	}
 }
 
