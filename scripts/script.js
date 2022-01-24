@@ -86,13 +86,15 @@ class Finish {
 		this.spriteUrl = 'img/Sports-Finish-Flag-icon.png';
 	}
 
-	subscribe(robot) {
+	subscribe(robot, scene) {
+		this.scene = scene;
 		robot.moveObservers.push(_.bind(this.finishWhenReached, this));
 	}
 
 	finishWhenReached(move) {
 		if (move.to.x == this.pos.x
 				&& move.to.y == this.pos.y) {
+			this.scene.program.stop();
 			window.alert("Gelukt!\nJe hebt de robot bij de finish gebracht!");
 		}
 	}
