@@ -193,10 +193,10 @@ class Program {
 }
 
 class Scene {
-	constructor(robot, bounds, entities) {
+	constructor(robot, bounds, otherEntities) {
 		this.$element = $('#scene');
 		this.$programText = $('#sourceCode');
-		this.entities = entities;
+		this.entities = _.concat(robot, bounds, otherEntities);
 		this.robot = robot;
 		this.bounds = bounds;
 		this.stepDelay = 500;
@@ -207,7 +207,6 @@ class Scene {
 	render() {
 		const me = this;
 		this._renderGrid();
-		this._showSprite(this.robot.pos, this.robot);
 
 		this._forEntities(
 			(x) => x.spriteUrl && x.pos,
@@ -223,7 +222,6 @@ class Scene {
 	}
 
 	_subscribeEvents() {
-		this.bounds.subscribe(this.robot);
 		this._subscribeMoveAnimation(this.robot);
 
 		this._forEntities(
