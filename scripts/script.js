@@ -216,6 +216,8 @@ class Scene {
 	runProgram() {
 		if (!this._hasRunningProgram()) {
 			this.program = this._makeProgram();
+			this._resetAllEntitiesToInitialPosition();
+			this.render();
 			this.program.run();
 		}
 		else {
@@ -291,6 +293,17 @@ class Scene {
 		return this.$element
 			.find("tr").eq(pos.y - this.bounds.y.min)
 			.find("td").eq(pos.x - this.bounds.x.min);
+	}
+
+	_resetToInitialPosition(entity) {
+		entity.pos = entity.initialPos;
+	}
+
+	_resetAllEntitiesToInitialPosition() {
+		const me = this;
+		this._forEntities(
+			(x) => x.initialPos && x.pos,
+			(x) => me._resetToInitialPosition(x));
 	}
 
 	_hasRunningProgram() {
