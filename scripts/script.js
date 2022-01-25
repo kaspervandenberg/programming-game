@@ -86,13 +86,15 @@ class Finish {
 		this.spriteUrl = 'img/Sports-Finish-Flag-icon.png';
 	}
 
-	subscribe(robot) {
+	subscribe(robot, scene) {
+		this.scene = scene;
 		robot.moveObservers.push(_.bind(this.finishWhenReached, this));
 	}
 
 	finishWhenReached(move) {
 		if (move.to.x == this.pos.x
 				&& move.to.y == this.pos.y) {
+			this.scene.program.stop();
 			window.alert("Gelukt!\nJe hebt de robot bij de finish gebracht!");
 		}
 	}
@@ -146,30 +148,35 @@ class Compiler {
 };
 
 class Program {
-	constructor(source, actionList, stepDelay) {
+	constructor(source, actionList, stepDelay, observers) {
 		this.status = 'stopped';
 		this.source = source;
 		this.actionList = actionList;
 		this.stepDelay = stepDelay;
+		this.observers = observers || [];
 	}
 
 	run() {
-		if (this.status != 'running') {
+		if (!this.isRunning()) {
 			const steps = _.map(this.actionList, this._step.bind(this));
 			if (steps && steps.length >= 1) {
-				this.status = 'running';
+				this._setStatus('running');
 				var promise = steps[0]();
 				const tail = steps.slice(1);
 				for (const x of tail) {
 					promise = promise.then(x);
 				}
-				promise.then(() => this.status = 'finished');
+				promise.then(() => this._setStatus('finished'));
 			}
 		}
 	}
 
 	stop() {
-		this.status = 'abort';
+		this._setStatus('abort');
+	}
+
+	isRunning() {
+		return this.status == 'running';
 	}
 
 	_step(action) {
@@ -177,7 +184,7 @@ class Program {
 		return function() {
 			const ret = $.Deferred();
 			function whenRunning(f) {
-				return (me.status == 'running')
+				return me.isRunning()
 					? f()
 					: ret.reject();
 			}
@@ -190,13 +197,24 @@ class Program {
 			return ret;
 		}
 	}
+
+	_setStatus(newStatus) {
+		const oldStatus = this.status;
+		this.status = newStatus;
+		this._notifyObservers(oldStatus, this.status);
+	}
+
+	_notifyObservers(oldStatus, status) {
+		_.each(this.observers, (f) => f(this, status, oldStatus));
+	}
 }
 
 class Scene {
-	constructor(robot, bounds, entities) {
+	constructor(robot, bounds, otherEntities, programObservers) {
 		this.$element = $('#scene');
 		this.$programText = $('#sourceCode');
-		this.entities = entities;
+		this.programObservers = programObservers || [];
+		this.entities = _.concat(robot, bounds, otherEntities);
 		this.robot = robot;
 		this.bounds = bounds;
 		this.stepDelay = 500;
@@ -204,31 +222,41 @@ class Scene {
 		this._subscribeEvents();
 	}
 
-	render() {
-		const me = this;
-		this._renderGrid();
-		this._showSprite(this.robot.pos, this.robot);
+	reset() {
+		this._resetAllEntitiesToInitialPosition();
+		this.render();
+	}
 
-		this._forEntities(
-			(x) => x.spriteUrl && x.pos,
-			(x) => me._showSprite(x.pos, x));
+	render() {
+		this._renderGrid();
+		this._showAllEntities();
 	}
 
 	runProgram() {
-		const compiler = new Compiler(this.robot);
-		const source = this.$programText.val();
-		const interpretedProgram = compiler.compile(source);
-		this.program = new Program(source, interpretedProgram, this.stepDelay);
-		this.program.run();
+		if (!this.hasRunningProgram()) {
+			this.program = this._makeProgram();
+			this.reset();
+			this.program.run();
+		}
+		else {
+			alert('Even wachten, het programma loopt nog.');
+		}
+	}
+
+	hasRunningProgram() {
+		return this.program
+			&& this.program.isRunning();
 	}
 
 	_subscribeEvents() {
-		this.bounds.subscribe(this.robot);
 		this._subscribeMoveAnimation(this.robot);
+		this._subscribeAllEnities();
+	}
 
+	_subscribeAllEnities() {
 		this._forEntities(
 			(x) => x.subscribe,
-			(x) => x.subscribe(this.robot));
+			(x) => x.subscribe(this.robot, this));
 	}
 
 	_subscribeMoveAnimation(robot) {
@@ -245,6 +273,13 @@ class Scene {
 			tableHtml.push('</tr>');
 		}
 		return this.$element.html(tableHtml.join(''));
+	}
+
+	_makeProgram() {
+		const compiler = new Compiler(this.robot);
+		const source = this.$programText.val();
+		const interpretedProgram = compiler.compile(source);
+		return new Program(source, interpretedProgram, this.stepDelay, this.programObservers);
 	}
 
 	_forEntities(predicate, action) {
@@ -265,6 +300,13 @@ class Scene {
 			.html('<img src="' + entity.spriteUrl + '"/>');
 	}
 
+	_showAllEntities() {
+		const me = this;
+		this._forEntities(
+			(x) => x.spriteUrl && x.pos,
+			(x) => me._showSprite(x.pos, x));
+	}
+
 	_clear(pos) {
 		this._findCell(pos)
 			.html('');
@@ -274,6 +316,17 @@ class Scene {
 		return this.$element
 			.find("tr").eq(pos.y - this.bounds.y.min)
 			.find("td").eq(pos.x - this.bounds.x.min);
+	}
+
+	_resetToInitialPosition(entity) {
+		entity.pos = entity.initialPos;
+	}
+
+	_resetAllEntitiesToInitialPosition() {
+		const me = this;
+		this._forEntities(
+			(x) => x.initialPos && x.pos,
+			(x) => me._resetToInitialPosition(x));
 	}
 }
 
@@ -288,6 +341,11 @@ $(document).ready(function() {
 		new GridBoundary(0, 0, 4, 4),
 		[ new Finish(2, 2)]);
 
+	scene.programObservers.push(disableButtonsWhenProgramIsRunning);
 	scene.render();
+
+	function disableButtonsWhenProgramIsRunning() {
+		$('button').attr('disabled', scene.hasRunningProgram());
+	}
 });
 
