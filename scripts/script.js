@@ -100,6 +100,26 @@ class Finish {
 	}
 }
 
+class Wall {
+	constructor(x, y) {
+		this.pos = Object.freeze({ x: x, y: y});
+		this.spriteUrl = 'img/bricksx64.png';
+	}
+
+	subscribe(robot) {
+		robot.moveAcceptors.push(_.bind(this.block, this));
+	}
+
+	block(move) {
+		var isBlocked = move.to.x == this.pos.x
+			&& move.to.y == this.pos.y;
+		if (isBlocked) {
+			window.alert("Au!\nEen muur");
+		}
+		return !isBlocked;
+	}
+}
+
 const syntaxCommandAndCount = /(left|right|up|down)\((\d+)\)\w*/g;
 
 class Compiler {
