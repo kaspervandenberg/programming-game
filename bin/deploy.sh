@@ -6,6 +6,7 @@ DIRS=("img"
        	"scripts/lib/lodash/4.17.15-npm");
 ASSETS=("img/Robot_37500.png"
 	"img/Sports-Finish-Flag-icon.png"
+	"img/bricksx64.png"
 	"img/play-64.png"
 	"img/undo-4-64.png"
 	"favicon.ico"
