@@ -21,15 +21,22 @@ button {
 	float: right;
 	margin-right: 8px;
 	height: 70px;
-	width: 180px;
+	width: 220px;
 	font-size: x-large;
-	background-image: linear-gradient(rgba(225, 200, 255, 0.5), rgba(125, 125, 200, 0.5));
+	background-color: rgba(125, 125, 200, 0.5);
 }
 
 button.run {
 	background-origin: padding-box;
 	padding-left:66px;
-	background-image: linear-gradient(rgba(200, 200, 255, 0.5), rgba(125, 125, 200, 0.5)),
-		url("../img/play-64.png");
+	background-image: url("../img/play-64.png");
+	background-repeat: no-repeat;
+}
+
+button.reset {
+	background-origin: padding-box;
+	background-position-x: 2px;
+	padding-left:66px;
+	background-image: url("../img/undo-4-64.png");
 	background-repeat: no-repeat;
 }
