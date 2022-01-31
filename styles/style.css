@@ -1,9 +1,35 @@
-table,
-td {
-    border: 1px solid #333;
+h1 {
+	align: center;
+}
+
+div:nth-child(2) {
+	float: left;
+	margin-right: 16px;
+}
+
+div:nth-child(3) {
+	float: right;
 }
 
 #scene td {
+    border: 1px solid #333;
     width: 66px;
     height: 66px;
+}
+
+button {
+	float: right;
+	margin-right: 8px;
+	height: 70px;
+	width: 180px;
+	font-size: x-large;
+	background-image: linear-gradient(rgba(225, 200, 255, 0.5), rgba(125, 125, 200, 0.5));
+}
+
+button.run {
+	background-origin: padding-box;
+	padding-left:66px;
+	background-image: linear-gradient(rgba(200, 200, 255, 0.5), rgba(125, 125, 200, 0.5)),
+		url("../img/play-64.png");
+	background-repeat: no-repeat;
 }

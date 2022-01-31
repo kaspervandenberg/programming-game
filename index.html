@@ -11,21 +11,27 @@
 		<script src="scripts/script.js" defer></script>
 	</head>
 	<body>
-		<h1><img src='img/Robot_37500.png'/> Robot Programmeren <img src='img/Robot_37500.png'/></h1>
-		<section>
-			<label for="sourceCode">Code:<br/></label>
-			<textarea id="sourceCode" name="sourceCode" rows="20" cols="80">
+		<h1><center><img src='img/Robot_37500.png'/> Robot Programmeren <img src='img/Robot_37500.png'/></center></h1>
+		<div>
+			<section>
+				<label for="sourceCode">Code:<br/></label>
+				<textarea id="sourceCode" name="sourceCode" rows="20" cols="80">
 left(2)
 up(1)
 right(2)
 down(1)
-			</textarea>
-			<button class="run" type="button" onclick="scene.runProgram()">Run</button>
-			<button class="reset" type=button" onclick="scene.reset()">Begin posities</button>
-		</section>
-		<section>
-			<table id="scene"></table>
-		</section>
+				</textarea>
+			</section>
+			<section>
+				<button class="reset" type=button" onclick="scene.reset()">Terug naar begin</button>
+				<button class="run" type="button" onclick="scene.runProgram()">Start</button>
+			</section>
+		</div>
+		<div>
+			<section>
+				<table id="scene">
+			</section>
+		</div>
 	</body>
 </html>
 
