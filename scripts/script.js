@@ -350,22 +350,45 @@ class Scene {
 	}
 }
 
+class Levels {
+	constructor() {
+		this.levelFactories = [
+			() => new Scene(
+				new Robot(4, 4),
+				new GridBoundary(0, 0, 4, 4),
+				[ new Finish(2, 2) ])
+		];
+		this.level = 1;
+	}
 
+	setLevel(level) {
+		this.level=level;
+		scene = this.levelFactories[level-1]();
+		scene.programObservers.push(disableButtonsWhenProgramIsRunning);
+		scene.render();
+	}
 
+	hasNextLevel() {
+		return this.level < this.levelFactories.length;
+	}
+
+	nextLevel() {
+		if (this.hasNextLevel()) {
+			this.setLevel(this.level + 1);
+		}
+	}
+}
+
+var levels;
 var scene = null;
 
 $(document).ready(function() {
 	"strict";
-	scene = new Scene(
-		new Robot(4, 4),
-		new GridBoundary(0, 0, 4, 4),
-		[ new Finish(2, 2)]);
-
-	scene.programObservers.push(disableButtonsWhenProgramIsRunning);
-	scene.render();
-
-	function disableButtonsWhenProgramIsRunning() {
-		$('button').attr('disabled', scene.hasRunningProgram());
-	}
+	levels = new Levels();
+	levels.setLevel(1);
 });
+
+function disableButtonsWhenProgramIsRunning() {
+	$('button').attr('disabled', scene.hasRunningProgram());
+}
 
