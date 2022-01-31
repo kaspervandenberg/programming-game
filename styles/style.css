@@ -1,9 +1,42 @@
-table,
-td {
-    border: 1px solid #333;
+h1 {
+	align: center;
+}
+
+div:nth-child(2) {
+	float: left;
+	margin-right: 16px;
+}
+
+div:nth-child(3) {
+	float: right;
 }
 
 #scene td {
+    border: 1px solid #333;
     width: 66px;
     height: 66px;
+}
+
+button {
+	float: right;
+	margin-right: 8px;
+	height: 70px;
+	width: 220px;
+	font-size: x-large;
+	background-color: rgba(125, 125, 200, 0.5);
+}
+
+button.run {
+	background-origin: padding-box;
+	padding-left:66px;
+	background-image: url("../img/play-64.png");
+	background-repeat: no-repeat;
+}
+
+button.reset {
+	background-origin: padding-box;
+	background-position-x: 2px;
+	padding-left:66px;
+	background-image: url("../img/undo-4-64.png");
+	background-repeat: no-repeat;
 }
