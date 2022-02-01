@@ -357,7 +357,12 @@ class Levels {
 			() => new Scene(
 				new Robot(4, 4),
 				new GridBoundary(0, 0, 4, 4),
-				[ new Finish(2, 2) ])
+				[ new Finish(2, 2) ]),
+			() => new Scene(
+				new Robot(4, 4),
+				new GridBoundary(0, 0, 4, 4),
+				[	new Finish(2, 2),
+					new Wall(2, 3), new Wall(3, 3), new Wall(4, 3) ]),
 		];
 		this.level = 1;
 	}
