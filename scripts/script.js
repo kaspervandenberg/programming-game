@@ -96,6 +96,7 @@ class Finish {
 				&& move.to.y == this.pos.y) {
 			this.scene.program.stop();
 			window.alert("Gelukt!\nJe hebt de robot bij de finish gebracht!");
+			levels.nextLevel();
 		}
 	}
 }
