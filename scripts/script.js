@@ -397,7 +397,10 @@ var scene = null;
 $(document).ready(function() {
 	"strict";
 	levels = new Levels();
-	levels.setLevel(1);
+	levels.setLevel(
+		new URLSearchParams(window.location.search)
+			.get('level')
+		?? 1);
 });
 
 function disableButtonsWhenProgramIsRunning() {
