@@ -96,7 +96,28 @@ class Finish {
 				&& move.to.y == this.pos.y) {
 			this.scene.program.stop();
 			window.alert("Gelukt!\nJe hebt de robot bij de finish gebracht!");
+			levels.nextLevel();
 		}
+	}
+}
+
+class Wall {
+	constructor(x, y) {
+		this.pos = Object.freeze({ x: x, y: y});
+		this.spriteUrl = 'img/bricksx64.png';
+	}
+
+	subscribe(robot) {
+		robot.moveAcceptors.push(_.bind(this.block, this));
+	}
+
+	block(move) {
+		var isBlocked = move.to.x == this.pos.x
+			&& move.to.y == this.pos.y;
+		if (isBlocked) {
+			window.alert("Au!\nEen muur");
+		}
+		return !isBlocked;
 	}
 }
 
@@ -330,22 +351,59 @@ class Scene {
 	}
 }
 
+class Levels {
+	constructor() {
+		this.levelFactories = [
+			() => new Scene(
+				new Robot(4, 4),
+				new GridBoundary(0, 0, 4, 4),
+				[ new Finish(2, 2) ]),
+			() => new Scene(
+				new Robot(4, 4),
+				new GridBoundary(0, 0, 4, 4),
+				[	new Finish(2, 2),
+					new Wall(2, 3), new Wall(3, 3), new Wall(4, 3) ]),
+			() => new Scene(
+				new Robot(4, 5),
+				new GridBoundary(0, 0, 4, 6),
+				[	new Finish(0, 0),
+					new Wall(0, 2), new Wall(1, 2), new Wall(2, 2), new Wall(2, 0),
+					new Wall(2, 5), new Wall(2, 4), new Wall(3, 4), new Wall(4, 4) ]),
+		];
+		this.level = 1;
+	}
 
+	setLevel(level) {
+		this.level=level;
+		scene = this.levelFactories[level-1]();
+		scene.programObservers.push(disableButtonsWhenProgramIsRunning);
+		scene.render();
+	}
 
+	hasNextLevel() {
+		return this.level < this.levelFactories.length;
+	}
+
+	nextLevel() {
+		if (this.hasNextLevel()) {
+			this.setLevel(this.level + 1);
+		}
+	}
+}
+
+var levels;
 var scene = null;
 
 $(document).ready(function() {
 	"strict";
-	scene = new Scene(
-		new Robot(4, 4),
-		new GridBoundary(0, 0, 4, 4),
-		[ new Finish(2, 2)]);
-
-	scene.programObservers.push(disableButtonsWhenProgramIsRunning);
-	scene.render();
-
-	function disableButtonsWhenProgramIsRunning() {
-		$('button').attr('disabled', scene.hasRunningProgram());
-	}
+	levels = new Levels();
+	levels.setLevel(
+		new URLSearchParams(window.location.search)
+			.get('level')
+		?? 1);
 });
+
+function disableButtonsWhenProgramIsRunning() {
+	$('button').attr('disabled', scene.hasRunningProgram());
+}
 
